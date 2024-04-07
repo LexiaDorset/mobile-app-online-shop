@@ -2,8 +2,6 @@ package com.stu74526.project_74526
 
 import android.content.ContentValues
 import android.util.Log
-import android.widget.HorizontalScrollView
-import android.widget.ScrollView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,25 +13,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -43,26 +36,25 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 var actualCategory by mutableStateOf("All")
 
 var categories by mutableStateOf(emptyMap<String, String>())
-var products by mutableStateOf(emptyMap<String, String>())
+var products by mutableStateOf(emptyMap<String, Product>())
+var Ok = false;
 
 @Composable
 fun DisplayImageFromUrl(url: String) {
@@ -72,14 +64,14 @@ fun DisplayImageFromUrl(url: String) {
         painter = painter,
         contentDescription = "Image from URL",
         modifier = Modifier
-            .size(75.dp)
+            .size(60.dp)
             .clip(CircleShape),
         contentScale = ContentScale.Crop
     )
 }
 
 @Composable
-fun HomePage() {
+fun HomePage(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -88,11 +80,11 @@ fun HomePage() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally)
+            horizontalAlignment = Alignment.CenterHorizontally)
         {
             AppBar()
             SearchBar()
-            Category()
+            Category(navController = navController)
         }
         BottomAppBar {
             Row(
@@ -121,11 +113,11 @@ fun AppBar()
     {
         Text(
             text = "Online Shopping App",
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Start
         )
-        ShowImage(drawable = R.drawable.cart, modifier = Modifier.size(50.dp))
+        ShowImage(drawable = R.drawable.cart, modifier = Modifier.size(30.dp))
         DisplayImageFromUrl("https://thispersondoesnotexist.com/")
     }
 }
@@ -146,13 +138,13 @@ fun SearchBar()
 
             BasicTextField(value = text, onValueChange = {
                 if (it.text.length <= 35) {
-                text = it
-            } },
+                    text = it
+                } },
                 modifier = Modifier
                     .height(30.dp)
                     .padding(5.dp)
                     .weight(1f),
-                )
+            )
             ShowImage(drawable =R.drawable.search, modifier = Modifier
                 .size(30.dp)
                 .padding(5.dp, 5.dp, 10.dp, 5.dp))
@@ -161,7 +153,7 @@ fun SearchBar()
 }
 
 @Composable
-fun Category() {
+fun Category(navController: NavController) {
 
     LaunchedEffect(Unit) {
         categories = getCategories()
@@ -170,9 +162,16 @@ fun Category() {
     Row(modifier = Modifier
         .horizontalScroll(rememberScrollState())
         .fillMaxWidth()) {
+        Button(onClick = {
+            actualCategory = "All"
+            products = allProducts
+        }){
+            Text(text = "All")
+        }
         categories.forEach { (key, value) ->
-            Button(onClick = { actualCategory = key
-                Log.d(ContentValues.TAG, "CategoryAAAAAAAAA: $actualCategory")
+            Button(onClick = {
+                actualCategory = key
+                products = allProducts.filter { it.value.category_id == key}
             }){
                 Text(text = value)
             }
@@ -180,7 +179,7 @@ fun Category() {
     }
     if(categories.isNotEmpty())
     {
-        Product()
+        Product(navController = navController)
     }
 }
 
@@ -197,19 +196,15 @@ suspend fun getCategories(): Map<String, String> {
 }
 
 @Composable
-fun Product()
+fun Product(navController: NavController)
 {
-    LaunchedEffect(actualCategory) {
-        Log.d(ContentValues.TAG, "CategoryLAUCHE: $actualCategory")
-        if(actualCategory != "All")
-            products = getProductsByCategory()
-        else{
-            products = getProducts()
-        }
+    LaunchedEffect(Unit) {
+        products = getProducts()
     }
 
     if(products.isNotEmpty())
     {
+        Log.d(ContentValues.TAG, "Product: $products")
         val productValue = products.values.toList()
         LazyVerticalGrid(modifier = Modifier.fillMaxWidth(0.8f).fillMaxHeight(0.9f),
             columns = GridCells.Adaptive(minSize = 128.dp),
@@ -218,42 +213,33 @@ fun Product()
         ) {
             items(products.size) { index ->
                 val product = productValue[index]
-                CardProduct(name = product)
-                Log.d(ContentValues.TAG, "Product: $product")
+                CardProduct(product,   products.keys.toList()[index], navController)
             }
-            Log.d(ContentValues.TAG, "Product: $products Size: ${products.size}")
         }
     }
-
 }
 
-suspend fun getProducts(): Map<String, String> {
-    val products = mutableMapOf<String, String>()
+suspend fun getProducts(): Map<String, Product> {
+    val products = mutableMapOf<String, Product>()
 
     productCollection.get().addOnSuccessListener { documents ->
         for (document in documents) {
-            products[document.id] = document.data[productName].toString()
+            val ddata = document.data
+            products[document.id] = Product(
+                getProductName(ddata),
+                getProductImage(ddata),
+                10.0,"COUCOU CMOI LA DESCRIPTION DE L'ITEM :)", true, getProductCategoryId(ddata)
+            )
         }
+        Ok = true
+
     }.await()
-
-    return products
-}
-
-suspend fun getProductsByCategory(): Map<String, String> {
-    val products = mutableMapOf<String, String>()
-    Log.d(ContentValues.TAG, "Category: $actualCategory")
-    productCollection.whereEqualTo(productCategoryId, actualCategory).get().addOnSuccessListener { documents ->
-        for (document in documents) {
-            Log.d(ContentValues.TAG, "Product: ${document.data[productName]}")
-            products[document.id] = document.data[productName].toString()
-        }
-    }.await()
-
+    allProducts = products
     return products
 }
 
 @Composable
-fun CardProduct(name : String)
+fun CardProduct(product : Product, productId : String, navController: NavController)
 {
     Column(modifier = Modifier
         .clip(MaterialTheme.shapes.large)
@@ -263,7 +249,7 @@ fun CardProduct(name : String)
         horizontalAlignment = Alignment.CenterHorizontally)
     {
         Button(
-            onClick = {},
+            onClick = { navController.navigate(Routes.ProductPage.route + "/${productId}") },
             shape = MaterialTheme.shapes.small,
             colors = ButtonDefaults.buttonColors(Color.Transparent),
             modifier = Modifier
@@ -273,7 +259,8 @@ fun CardProduct(name : String)
             contentPadding = PaddingValues(5.dp)
         )
         {
-            ShowImage(drawable = R.drawable.pop_lexa, modifier = Modifier.fillMaxSize())
+            ShowImage(drawable = LocalContext.current.resources.getIdentifier(product.image,
+                "drawable", "com.stu74526.project_74526"), modifier = Modifier.fillMaxSize())
         }
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -283,8 +270,8 @@ fun CardProduct(name : String)
             Column(modifier = Modifier
                 .clickable { }
                 .padding(start = 5.dp, bottom = 5.dp)) {
-                Text(text = name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Product Price", fontSize = 13.sp)
+                Text(text = product.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(text = product.price.toString() + " $", fontSize = 11.sp)
             }
             ShowImage(drawable = R.drawable.heart, modifier = Modifier
                 .size(25.dp)

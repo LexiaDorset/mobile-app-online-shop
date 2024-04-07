@@ -24,7 +24,15 @@ fun Navigation() {
         }
         composable(route = Routes.HomePage.route)
         {
-            HomePage()
+            HomePage(navController = navController)
+        }
+        composable(route = Routes.ProductPage.route + "/{productId}",
+            arguments = listOf(navArgument("productId") { defaultValue = "0"}))
+        {
+                backStackEntry ->
+            ProductMain(
+                navController = navController,
+                backStackEntry.arguments?.getString("productId"))
         }
     }
 }
