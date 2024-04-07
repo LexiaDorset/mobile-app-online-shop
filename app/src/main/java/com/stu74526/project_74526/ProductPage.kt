@@ -1,6 +1,7 @@
 package com.stu74526.project_74526
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,10 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -41,10 +45,10 @@ fun ProductMain(navController: NavController, productId: String?) {
         val product = allProducts[productId]
         if (product != null) {
             Column(verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally) {
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()) {
                 ProductImage(product = product, navController = navController)
                 ProductBody(product = product)
-                Spacer(Modifier.weight(1f))
                 BottomAppBar {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -52,9 +56,11 @@ fun ProductMain(navController: NavController, productId: String?) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         ShowImage(drawable = R.drawable.home,
-                            modifier = Modifier.size(50.dp).clickable {
-                                navController.popBackStack(Routes.HomePage.route, false)
-                            })
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable {
+                                    navController.popBackStack(Routes.HomePage.route, false)
+                                })
                         ShowImage(drawable = R.drawable.historical, modifier = Modifier
                             .size(50.dp)
                             .clickable { /* Handle category click */ })
@@ -79,7 +85,8 @@ fun ProductMain(navController: NavController, productId: String?) {
 
 @Composable
 fun ProductImage(product: Product, navController: NavController) {
-    Box()
+    Box(modifier = Modifier.background(Color.LightGray)
+        .clip(MaterialTheme.shapes.medium))
     {
         ShowImageString(drawable = product.image, modifier = Modifier
             .fillMaxWidth()
@@ -97,14 +104,14 @@ fun BackButton(navController: NavController) {
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(Color.Transparent),
         modifier = Modifier
-            .padding(0.dp)
+            .padding(5.dp)
             .height(40.dp)
             .width(40.dp),
         contentPadding = PaddingValues(0.dp)
     )
     {
         Image(
-            painter = painterResource(id = R.drawable.downarrow),
+            painter = painterResource(id = R.drawable.back),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
         )
@@ -120,30 +127,53 @@ fun ProductBody(product: Product) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .fillMaxHeight(0.8f)
             .padding(20.dp)
+        , verticalArrangement = Arrangement.SpaceBetween
     )
     {
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween){
             Text(text = product.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(text = product.price.toString(), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = "$"+product.price.toString(), fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
         Text(text = product.description, fontSize = 20.sp)
-        Row {
-            Text(text = "Quantity", fontSize = 21.sp, fontWeight = FontWeight.Bold)
-            ButtonsQuantity(onClick = { }, draw = R.drawable.minusunselected, enabled = false)
-            Text(text = actualQuantity.toString(), fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            ButtonsQuantity(onClick = { actualQuantity += 1 }, draw = R.drawable.plusselected)
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.border(1.dp, Color.Black, MaterialTheme.shapes.small)) {
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.fillMaxWidth(0.4f),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically)
+            {
+                if(actualQuantity > 1)
+                {
+                    ButtonsQuantity(onClick = { actualQuantity -= 1 }, "-")
+                }
+                else{
+                    ButtonsQuantity(onClick = { actualQuantity -= 1 }, "-", enabled = false)
+                }
+                Text(text = actualQuantity.toString(), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                ButtonsQuantity(onClick = { actualQuantity += 1 }, "+")
+            }
+            ShowImage(drawable = R.drawable.heart, modifier = Modifier
+                .size(25.dp)
+              )
+        }
+        Column(modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth(0.8f)
+                .clip(MaterialTheme.shapes.small)) {
                 Text(text = "Add to Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             }
         }
+
     }
 }
 
 @Composable
 fun ButtonsQuantity(
-    onClick: () -> Unit, draw: Int, enabled: Boolean = true,
+    onClick: () -> Unit, textString : String, enabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
     Button(
@@ -156,12 +186,11 @@ fun ButtonsQuantity(
             .width(30.dp)
             .padding(paddingValues),
         contentPadding = PaddingValues(0.dp),
-        enabled = enabled
+        enabled = enabled,
+        shape = MaterialTheme.shapes.small,
+        colors = ButtonDefaults.buttonColors(Color.LightGray),
     ) {
-        ShowImageScale(
-            draw = draw,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
+        Text(text = textString, fontSize = 20.sp, fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center, color = Color.Black)
     }
 }

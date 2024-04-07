@@ -72,10 +72,15 @@ fun DisplayImageFromUrl(url: String) {
 
 @Composable
 fun HomePage(navController: NavController) {
+    if(currentUser == null)
+    {
+        navController.navigate(Routes.LoginPage.route)
+        return
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray),
+            .background(Color.White),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -243,7 +248,6 @@ fun CardProduct(product : Product, productId : String, navController: NavControl
 {
     Column(modifier = Modifier
         .clip(MaterialTheme.shapes.large)
-        .background(Color.White)
         .width(150.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally)
@@ -255,7 +259,8 @@ fun CardProduct(product : Product, productId : String, navController: NavControl
             modifier = Modifier
                 .padding(0.dp)
                 .width(150.dp)
-                .height(90.dp),
+                .height(90.dp)
+                .background(Color.LightGray),
             contentPadding = PaddingValues(5.dp)
         )
         {

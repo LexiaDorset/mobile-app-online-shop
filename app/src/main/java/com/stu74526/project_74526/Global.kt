@@ -11,12 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.HashMap
 
 val db = FirebaseFirestore.getInstance()
 
 var allProducts by mutableStateOf(emptyMap<String, Product>())
+
+var currentUser : FirebaseUser? = null
+
 
 const val userRef = "user"
 const val productRef = "product"
