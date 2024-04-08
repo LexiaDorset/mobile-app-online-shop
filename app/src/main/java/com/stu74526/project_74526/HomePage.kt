@@ -32,9 +32,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,13 +53,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 var actualCategory by mutableStateOf("All")
 
 var categories by mutableStateOf(emptyMap<String, String>())
 var products by mutableStateOf(emptyMap<String, Product>())
-var Ok = false;
 
 @Composable
 fun DisplayImageFromUrl(url: String) {
@@ -173,9 +183,16 @@ fun Category(navController: NavController) {
         }){
             Text(text = "All")
         }
+        Button(onClick = {
+            actualCategory = "Favorite"
+            products = allProducts.filter { it.value.favorite }
+        }){
+            Text(text = "Favorite")
+        }
         categories.forEach { (key, value) ->
             Button(onClick = {
                 actualCategory = key
+                products = emptyMap()
                 products = allProducts.filter { it.value.category_id == key}
             }){
                 Text(text = value)
@@ -186,27 +203,35 @@ fun Category(navController: NavController) {
     {
         Product(navController = navController)
     }
+    else{
+        Log.d(ContentValues.TAG, "JSUIS VIIIIIIDE OUUU ?")
+    }
 }
 
 suspend fun getCategories(): Map<String, String> {
-    val categories = mutableMapOf<String, String>()
+    var categories = mutableMapOf<String, String>()
+    var success = false
 
-    categoryCollection.get().addOnSuccessListener { documents ->
-        for (document in documents) {
-            categories[document.id] = document.data[categoryName].toString()
+    while (!success) {
+        try {
+            val documents = categoryCollection.get().await()
+            for (document in documents) {
+                categories[document.id] = document.data[categoryName].toString()
+            }
+            success = true
+        } catch (e: Exception) {
+            delay(1000)
+            Log.d(ContentValues.TAG, "getCategories: ${e.message}")
         }
-    }.await()
+    }
 
     return categories
 }
 
+
 @Composable
 fun Product(navController: NavController)
 {
-    LaunchedEffect(Unit) {
-        products = getProducts()
-    }
-
     if(products.isNotEmpty())
     {
         Log.d(ContentValues.TAG, "Product: $products")
@@ -223,29 +248,52 @@ fun Product(navController: NavController)
         }
     }
 }
-
-suspend fun getProducts(): Map<String, Product> {
+suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuation ->
     val products = mutableMapOf<String, Product>()
 
     productCollection.get().addOnSuccessListener { documents ->
-        for (document in documents) {
+        documents.forEach { document ->
             val ddata = document.data
-            products[document.id] = Product(
-                getProductName(ddata),
-                getProductImage(ddata),
-                10.0,"COUCOU CMOI LA DESCRIPTION DE L'ITEM :)", true, getProductCategoryId(ddata)
-            )
-        }
-        Ok = true
+            val productName = getProductName(ddata)
+            val productImage = getProductImage(ddata)
+            val productCategoryId = getProductCategoryId(ddata)
 
-    }.await()
-    allProducts = products
-    return products
+            val favoriteQuery = favoriteCollection
+                .whereEqualTo(favoriteUserId, userId)
+                .whereEqualTo(favoriteProductId, document.id)
+
+            favoriteQuery.get().addOnSuccessListener { favoriteDocuments ->
+                val favorite = !favoriteDocuments.isEmpty
+                products[document.id] = Product(
+                    productName,
+                    productImage,
+                    10.0,
+                    "COUCOU CMOI LA DESCRIPTION DE L'ITEM :)",
+                    true,
+                    productCategoryId,
+                    favorite
+                )
+
+                if (products.size == documents.size()) {
+                    allProducts = products
+                    continuation.resume(products)
+                }
+            }.addOnFailureListener { exception ->
+                continuation.resumeWithException(exception)
+            }
+        }
+    }.addOnFailureListener { exception ->
+        continuation.resumeWithException(exception)
+    }
 }
+
+
 
 @Composable
 fun CardProduct(product : Product, productId : String, navController: NavController)
 {
+    var isFavorite = remember(productId) { mutableStateOf(product.favorite) }
+
     Column(modifier = Modifier
         .clip(MaterialTheme.shapes.large)
         .width(150.dp),
@@ -278,9 +326,39 @@ fun CardProduct(product : Product, productId : String, navController: NavControl
                 Text(text = product.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 Text(text = product.price.toString() + " $", fontSize = 11.sp)
             }
-            ShowImage(drawable = R.drawable.heart, modifier = Modifier
-                .size(25.dp)
-                .padding(end = 5.dp, bottom = 5.dp))
+
+            val heartIcon = if (isFavorite.value) R.drawable.heart2 else R.drawable.heart
+            ShowImage(
+                drawable = heartIcon,
+                modifier = Modifier
+                    .size(25.dp)
+                    .padding(end = 5.dp, bottom = 5.dp)
+                    .clickable {
+                        isFavorite.value = !isFavorite.value
+                        product.favorite = isFavorite.value
+                        updateFavorite(productId)
+                    }
+            )
+        }
+    }
+}
+
+fun updateFavorite(productId: String) {
+    val favoriteQuery = favoriteCollection
+        .whereEqualTo(favoriteUserId, userId)
+        .whereEqualTo(favoriteProductId, productId)
+
+    favoriteQuery.get().addOnSuccessListener { documents ->
+        if (documents.isEmpty) {
+            val data = hashMapOf(
+                favoriteUserId to userId,
+                favoriteProductId to productId
+            )
+            favoriteCollection.add(data)
+        } else {
+            documents.forEach { document ->
+                favoriteCollection.document(document.id).delete()
+            }
         }
     }
 }

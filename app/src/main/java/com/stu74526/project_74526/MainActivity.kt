@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -22,9 +23,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
         currentUser = FirebaseAuth.getInstance().currentUser
-        setContent {
-            Navigation()
-            Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
+        // Get the good user with user_id in userCollection
+        if (currentUser != null) {
+            val userId_ = currentUser!!.uid
+            userCollection.whereEqualTo(userUserId, userId_).get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        userId = document.id
+                        Log.d(ContentValues.TAG, "userId: ${document.id}")
+                        return@addOnSuccessListener
+                    }
+                }
+
+            setContent {
+                LaunchedEffect(Unit) {
+                    products = getProducts()
+                }
+                Navigation()
+
+                Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
+            }
         }
     }
 

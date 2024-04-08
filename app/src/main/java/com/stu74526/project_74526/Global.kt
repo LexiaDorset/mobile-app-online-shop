@@ -21,6 +21,7 @@ var allProducts by mutableStateOf(emptyMap<String, Product>())
 
 var currentUser : FirebaseUser? = null
 
+var userId : String = ""
 
 const val userRef = "user"
 const val productRef = "product"
@@ -28,6 +29,7 @@ const val orderRef = "order"
 const val categoryRef = "category"
 const val productCartRef = "productcart"
 const val productOrderRef = "productorder"
+const val favoriteRef = "favorite"
 
 val userCollection = db.collection(userRef)
 val productCollection = db.collection(productRef)
@@ -35,6 +37,7 @@ val orderCollection = db.collection(orderRef)
 val categoryCollection = db.collection(categoryRef)
 val productCartCollection = db.collection(productCartRef)
 val productOrderCollection = db.collection(productOrderRef)
+val favoriteCollection = db.collection(favoriteRef)
 
 // User Strings
 
@@ -80,6 +83,21 @@ val productOrderProductId = "product_id"
 val productOrderQuantity = "quantity"
 val productOrderTotal = "total"
 
+// Favorite Strings
+val favoriteUserId = "user_id"
+val favoriteProductId = "product_id"
+
+// Favorite Get Values
+
+fun getFavoriteUserId(data: MutableMap<String, Any>) : String
+{
+    return data[favoriteUserId] as String
+}
+
+fun getFavoriteProductId(data: MutableMap<String, Any>) : String
+{
+    return data[favoriteProductId] as String
+}
 
 // Product Get Values
 fun getProductName(data: MutableMap<String, Any>) : String
