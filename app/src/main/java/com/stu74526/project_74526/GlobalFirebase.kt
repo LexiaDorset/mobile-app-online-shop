@@ -182,3 +182,17 @@ suspend fun getProductCart(): MutableMap<String, Int> = suspendCoroutine { conti
             continuation.resumeWithException(exception)
         }
 }
+
+fun removeProductCart(productId: String) {
+    productCartCollection.whereEqualTo(productCartUserId, userId)
+        .whereEqualTo(productCartProductId, productId)
+        .get()
+        .addOnSuccessListener { documents ->
+            for (document in documents) {
+                productCartCollection.document(document.id).delete()
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.w(ContentValues.TAG, "Error deleting document", e)
+        }
+}

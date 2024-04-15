@@ -33,7 +33,11 @@ import com.stu74526.project_74526.ui.theme.RoyalBlue
 
 var allProducts by mutableStateOf(emptyMap<String, Product>())
 
-var productsCart = mutableMapOf<String, Int>()
+var productsCart by mutableStateOf(mutableMapOf<String, Int>())
+
+//var productsCart = mutableMapOf<String, Int>()
+
+var sizeIconBottomBar = 40.dp
 
 @Composable
 fun DisplayImageFromUrl(url: String, modifier: Modifier = Modifier) {
@@ -100,7 +104,10 @@ fun BottomBarGlobal(
         modifier = Modifier
             .fillMaxWidth()
             .background(RoyalBlue)
-            .padding(10.dp),
+            .padding(
+                top = 15.dp, bottom = 15.dp,
+                start = 20.dp, end = 20.dp
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     )
@@ -123,15 +130,15 @@ fun BottomBar(
     profile: () -> Unit = {}, productCart: Int
 ) {
     ShowImage(drawable = R.drawable.home, modifier = Modifier
-        .size(50.dp)
+        .size(sizeIconBottomBar)
         .clickable { home() })
     ShowImage(drawable = R.drawable.historical, modifier = Modifier
-        .size(50.dp)
+        .size(sizeIconBottomBar)
         .clickable { historic() })
     if (productCart > 0) {
         Box {
             ShowImage(drawable = R.drawable.cart, modifier = Modifier
-                .size(50.dp)
+                .size(sizeIconBottomBar)
                 .clickable { cart() })
             Box(
                 modifier = Modifier
@@ -149,10 +156,10 @@ fun BottomBar(
         }
     } else {
         ShowImage(drawable = R.drawable.cart, modifier = Modifier
-            .size(50.dp)
+            .size(sizeIconBottomBar)
             .clickable { cart() })
     }
     ShowImage(drawable = R.drawable.profile, modifier = Modifier
-        .size(50.dp)
+        .size(sizeIconBottomBar)
         .clickable { profile() })
 }

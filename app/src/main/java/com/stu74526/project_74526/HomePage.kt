@@ -320,7 +320,20 @@ fun CardProductDetails(product: Product, productId: String, navController: NavCo
         .clickable { navController.navigate(Routes.ProductPage.route + "/${productId}") }
         .padding(start = 5.dp, bottom = 5.dp)) {
         Text(text = product.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        Text(text = product.price.toString() + "€", fontSize = 11.sp)
+        val price = product.price
+        val euros = price.toInt()
+        val cents = ((price - euros) * 100).toInt()
+
+        Row {
+            Text(
+                text = euros.toString(),
+                fontSize = 16.sp
+            )
+            Text(
+                text = "€" + cents.toString().padStart(2, '0'),
+                fontSize = 12.sp
+            )
+        }
     }
 }
 
@@ -355,6 +368,7 @@ suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuatio
             val productName = getProductName(ddata)
             val productImage = getProductImage(ddata)
             val productCategoryId = getProductCategoryId(ddata)
+            val productPrice = getProductPrice(ddata)
 
             val favoriteQuery = favoriteCollection
                 .whereEqualTo(favoriteUserId, userId)
@@ -365,7 +379,7 @@ suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuatio
                 products[document.id] = Product(
                     productName,
                     productImage,
-                    10.0,
+                    productPrice,
                     "COUCOU CMOI LA DESCRIPTION DE L'ITEM :)",
                     true,
                     productCategoryId,

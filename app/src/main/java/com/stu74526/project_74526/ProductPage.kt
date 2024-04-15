@@ -51,7 +51,8 @@ fun ProductMain(navController: NavController, productId: String?) {
             ) {
                 ProductImage(product = product, navController = navController)
                 ProductBody(product = product)
-                BottomBarGlobal()
+                BottomBarGlobal(home = { navController.popBackStack(Routes.HomePage.route, false) },
+                    cart = { navController.navigate(Routes.CartPage.route) })
             }
         } else {
             navController.popBackStack(Routes.HomePage.route, false)
@@ -185,8 +186,8 @@ fun ProductBody(product: Product) {
                         totalCart -= product.price * productsCart[product.id]!!
                         totalCart += product.price * actualQuantity
                         updateProductCart(productCartData)
-
                     } else {
+                        totalCart += product.price * actualQuantity
                         addProductCart(productCartData)
                     }
                     productsCart[product.id] = actualQuantity

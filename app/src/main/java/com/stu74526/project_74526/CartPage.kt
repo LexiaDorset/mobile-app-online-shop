@@ -1,5 +1,6 @@
 package com.stu74526.project_74526
 
+import android.content.ContentValues
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,11 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -28,10 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.stu74526.project_74526.ui.theme.DorsetColor
+import kotlin.math.roundToInt
 
 var totalCart = 0.0
 
@@ -59,23 +67,27 @@ fun OrderBody() {
         horizontalAlignment = Alignment.CenterHorizontally
     )
     {
-        //  for (product in productsCart) {
-        //    allProducts[product.key]?.let {
-        //      totalCart += it.price * product.value
-        //}
-        //}
         val totalM = remember { mutableDoubleStateOf(totalCart) }
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp))
+        // Utilisez un LaunchedEffect pour observer les changements de productsCart
+        LaunchedEffect(productsCart) {
+            Log.d(ContentValues.TAG, "productsCart changed: $productsCart")
+        }
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier.fillMaxHeight(0.8f)
+        )
         {
-
-            for (product in productsCart) {
-
-                allProducts[product.key]?.let {
-                    CardProductOrder(
-                        product = it,
-                        quantity = product.value,
-                        totalM
-                    )
+            productsCart.keys.forEach {
+                val product = allProducts[it]
+                if (product != null) {
+                    item {
+                        CardProductOrder(
+                            product = product,
+                            quantity = productsCart[it]!!,
+                            totalM
+                        )
+                    }
+                    Log.d(ContentValues.TAG, "Recompose: $product")
                 }
             }
         }
@@ -92,10 +104,24 @@ fun OrderBody() {
                     fontWeight = FontWeight(500)
                 )
 
-                Text(
-                    text = "${totalM.doubleValue} €", fontSize = 25.sp, color = Color.Black,
-                    fontWeight = FontWeight(700)
-                )
+                val euros = totalM.doubleValue.toInt()
+                val cents = ((totalM.doubleValue - euros) * 100).toInt()
+
+                Row()
+                {
+                    Text(
+                        text = "$euros",
+                        fontSize = 25.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(700)
+                    )
+                    Text(
+                        text = "€${cents.toString().padStart(2, '0')}",
+                        fontSize = 22.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(700)
+                    )
+                }
             }
 
             Button(
@@ -122,14 +148,18 @@ fun OrderBody() {
 fun CardProductOrder(product: Product, quantity: Int, totalM: MutableDoubleState) {
     var actualQuantity: MutableIntState = remember(product.id) { mutableIntStateOf(quantity) }
 
-    val price = product.price * actualQuantity.intValue
+    val price = (product.price * actualQuantity.intValue)
+    val euros = price.toInt()
+    val cents = ((price - euros) * 100).toInt()
+
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .height(80.dp)
             .border(1.dp, Color.LightGray, MaterialTheme.shapes.large)
-            .fillMaxWidth(0.8f),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .fillMaxWidth(0.9f)
+            .padding(end = 15.dp),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     )
     {
@@ -149,87 +179,97 @@ fun CardProductOrder(product: Product, quantity: Int, totalM: MutableDoubleState
                     .fillMaxSize()
             )
         }
-
-
-        Column {
-            Text(text = product.name, fontSize = 18.sp)
-            Text(text = "Total: $price", fontSize = 15.sp)
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        )
+        Row(modifier = Modifier.padding(start = 10.dp))
         {
-            if (actualQuantity.intValue > 1) {
-                ButtonsQuantity(onClick = {
-                    Log.d(
-                        "TotalEEE :| totalM BEFORE",
-                        totalM.doubleValue.toString()
-                    )
-                    Log.d(
-                        "TotalEEE :BEFORE ",
-                        totalCart.toString()
-                    )
-                    Log.d(
-                        "TotalEEE :BEFORE ",
-                        product.price.toString()
-                    )
-                    actualQuantity.intValue -= 1
-                    totalCart -= product.price
-                    totalM.doubleValue = totalCart
-                    Log.d(
-                        "TotalEEE :| totalM:",
-                        totalM.doubleValue.toString()
-                    )
-                    Log.d(
-                        "TotalEEE : ",
-                        totalCart.toString()
-                    )
-                    Log.d(
-                        "TotalEEE : ",
-                        price.toString()
-                    )
-                }, "-")
-            } else {
-                ButtonsQuantity(onClick = {
-
-                }, "-", enabled = false)
+            Column {
+                Text(
+                    text = product.name, fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row()
+                {
+                    Text(text = "Total: $euros", fontSize = 15.sp)
+                    Text(text = "€${cents.toString().padStart(2, '0')}", fontSize = 12.sp)
+                }
             }
-            Text(
-                text = actualQuantity.intValue.toString(),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            ButtonsQuantity(onClick = {
-                Log.d(
-                    "TotalEEE :| totalM BEFORE",
-                    totalM.doubleValue.toString()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.End
+            ) {
+                Button(
+                    onClick = {
+                        productsCart.remove(product.id)
+                        totalCart -= price
+                        totalM.doubleValue = totalCart
+                        removeProductCart(product.id)
+                    },
+                    modifier = Modifier
+                        .padding(bottom = 5.dp)
+                        .height(30.dp)
+                        .width(30.dp)
+                        .padding(0.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    shape = MaterialTheme.shapes.small,
+                    colors = ButtonDefaults.buttonColors(Color.Red),
+                ) {
+                    Text(
+                        text = "X", fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center, color = Color.White
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 )
-                Log.d(
-                    "TotalEEE :BEFORE ",
-                    totalCart.toString()
-                )
-                Log.d(
-                    "TotalEEE :BEFORE ",
-                    product.price.toString()
-                )
-                actualQuantity.intValue += 1
-                totalCart += product.price
-                totalM.doubleValue = totalCart
-                Log.d(
-                    "TotalEEE :| totalM:",
-                    totalM.doubleValue.toString()
-                )
-                Log.d(
-                    "TotalEEE : ",
-                    totalCart.toString()
-                )
-                Log.d(
-                    "TotalEEE : ",
-                    price.toString()
-                )
-            }, "+")
+                {
+
+                    if (actualQuantity.intValue > 1) {
+                        ButtonsQuantity(onClick = {
+                            actualQuantity.intValue -= 1
+                            productsCart[product.id] = actualQuantity.intValue
+                            totalCart -= product.price
+                            totalM.doubleValue = totalCart
+                            val productCartData: HashMap<String, Any?> = hashMapOf(
+                                "product_id" to product.id,
+                                "user_id" to userId,
+                                "quantity" to actualQuantity.intValue,
+                            )
+                            updateProductCart(productCartData)
+                        }, "-")
+                    } else {
+                        ButtonsQuantity(onClick = {
+
+                        }, "-", enabled = false)
+                    }
+                    Text(
+                        text = actualQuantity.intValue.toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                    )
+                    ButtonsQuantity(onClick = {
+                        actualQuantity.intValue += 1
+                        productsCart[product.id] = actualQuantity.intValue
+                        totalCart += product.price
+                        totalM.doubleValue = totalCart
+                        val productCartData: HashMap<String, Any?> = hashMapOf(
+                            "product_id" to product.id,
+                            "user_id" to userId,
+                            "quantity" to actualQuantity.intValue,
+                        )
+                        updateProductCart(productCartData)
+                    }, "+")
+                }
+
+            }
+
         }
     }
 }
