@@ -8,22 +8,29 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
 
+    val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
         currentUser = FirebaseAuth.getInstance().currentUser
         // Get the good user with user_id in userCollection
+        Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
         if (currentUser != null) {
             val userId_ = currentUser!!.uid
             userCollection.whereEqualTo(userUserId, userId_).get()
@@ -35,14 +42,22 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-            setContent {
-                LaunchedEffect(Unit) {
-                    products = getProducts()
-                }
-                Navigation()
 
-                Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
+        }
+        setContent {
+            var isNavigationReady by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                products = getProducts()
+                productsCart = getProductCart()
+                isNavigationReady = true
             }
+
+            if (isNavigationReady) {
+                Navigation()
+            }
+
+            Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
         }
     }
 
@@ -61,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
     public fun signIn(email: String, password: String, navController: NavController) {
         // [START sign_in_with_email]
-        if(email == "" || password == ""){
+        if (email == "" || password == "") {
             Toast.makeText(
                 baseContext,
                 "Please enter email and password",
@@ -94,9 +109,14 @@ class MainActivity : ComponentActivity() {
     private fun updateUI(user: FirebaseUser?) {
     }
 
-    public fun createAccount(email: String, password: String, username : String, navController: NavController) {
+    public fun createAccount(
+        email: String,
+        password: String,
+        username: String,
+        navController: NavController
+    ) {
         // [START create_user_with_email]
-        if(email == "" || password == "" || username == ""){
+        if (email == "" || password == "" || username == "") {
             Toast.makeText(
                 baseContext,
                 "Please enter email, username and password",
@@ -112,14 +132,15 @@ class MainActivity : ComponentActivity() {
                     val user = auth.currentUser
                     val userAdd = hashMapOf(
                         "email" to email,
-                        "username" to username
+                        "username" to username,
+                        "user_id" to user!!.uid
                     )
-                   addUser(userAdd)
+                    addUser(userAdd)
                     navController.navigate(Routes.HomePage.route)
                     updateUI(user)
                 } else {
                     // If sign in fails, display a message to the user.
-                     Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                    Log.w(TAG, "createUserWithEmail:failure", task.exception)
                     Toast.makeText(
                         baseContext,
                         "Authentication failed.",

@@ -6,4 +6,5 @@ sealed class Routes(val route: String) {
     object HomePage : Routes("home_page")
     object ProductPage : Routes("product_page/{productId}")
 
+    object CartPage : Routes("cart_page")
 }

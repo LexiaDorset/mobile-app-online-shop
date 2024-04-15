@@ -2,7 +2,6 @@ package com.stu74526.project_74526
 
 import android.content.ContentValues
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,26 +19,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,13 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.QuerySnapshot
+import com.stu74526.project_74526.ui.theme.DorsetColor
+import com.stu74526.project_74526.ui.theme.EpitaColor
+import com.stu74526.project_74526.ui.theme.Purple40
+import com.stu74526.project_74526.ui.theme.RoyalBlue
+import com.stu74526.project_74526.ui.theme.White20
+import com.stu74526.project_74526.ui.theme.White40
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
@@ -66,24 +60,11 @@ var actualCategory by mutableStateOf("All")
 var categories by mutableStateOf(emptyMap<String, String>())
 var products by mutableStateOf(emptyMap<String, Product>())
 
-@Composable
-fun DisplayImageFromUrl(url: String) {
-    val painter = rememberImagePainter(data = url)
-
-    Image(
-        painter = painter,
-        contentDescription = "Image from URL",
-        modifier = Modifier
-            .size(60.dp)
-            .clip(CircleShape),
-        contentScale = ContentScale.Crop
-    )
-}
+/* Composable Functions */
 
 @Composable
 fun HomePage(navController: NavController) {
-    if(currentUser == null)
-    {
+    if (currentUser == null) {
         navController.navigate(Routes.LoginPage.route)
         return
     }
@@ -94,119 +75,256 @@ fun HomePage(navController: NavController) {
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally)
-        {
-            AppBar()
-            SearchBar()
-            Category(navController = navController)
-        }
-        BottomAppBar {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                ShowImage(drawable = R.drawable.home, modifier = Modifier.size(50.dp))
-                ShowImage(drawable = R.drawable.historical, modifier = Modifier.size(50.dp)
-                    .clickable { /* Handle category click */ })
-                ShowImage(drawable = R.drawable.cart, modifier = Modifier.size(50.dp)
-                    .clickable { /* Handle cart click */ })
-                ShowImage(drawable = R.drawable.profile, modifier = Modifier.size(50.dp)
-                    .clickable { /* Handle profile click */ })
-            }
-        }
+        HomeContent(navController = navController)
     }
 }
 
 @Composable
-fun AppBar()
-{
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically)
+fun HomeContent(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    )
     {
-        Text(
-            text = "Online Shopping App",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Start
+        AppBar()
+        //SearchBar()
+        Category(navController = navController)
+    }
+    BottomBarGlobal(cart = { navController.navigate(Routes.CartPage.route) })
+}
+
+@Composable
+fun AppBar() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(RoyalBlue)
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    )
+    {
+        ShowImage(drawable = R.drawable.logo)
+        DisplayImageFromUrl(
+            "https://thispersondoesnotexist.com/", modifier = Modifier
+                .size(60.dp)
+                .clip(CircleShape)
         )
-        ShowImage(drawable = R.drawable.cart, modifier = Modifier.size(30.dp))
-        DisplayImageFromUrl("https://thispersondoesnotexist.com/")
     }
 }
 
 @Composable
-fun SearchBar()
-{
-    var text by remember { mutableStateOf(TextFieldValue("")) }
+fun SearchBar() {
     Box(
         Modifier
             .border(1.dp, Color.DarkGray, CircleShape)
             .fillMaxWidth(0.8f),
-        contentAlignment = Alignment.CenterStart)
+        contentAlignment = Alignment.CenterStart
+    )
     {
-        Row(verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center)
-        {
+        SearchBarContent()
+    }
+}
 
-            BasicTextField(value = text, onValueChange = {
+@Composable
+fun SearchBarContent() {
+    var text by remember { mutableStateOf(TextFieldValue("")) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    )
+    {
+
+        BasicTextField(
+            value = text,
+            onValueChange = {
                 if (it.text.length <= 35) {
                     text = it
-                } },
-                modifier = Modifier
-                    .height(30.dp)
-                    .padding(5.dp)
-                    .weight(1f),
-            )
-            ShowImage(drawable =R.drawable.search, modifier = Modifier
+                }
+            },
+            modifier = Modifier
+                .height(30.dp)
+                .padding(5.dp)
+                .weight(1f)
+        )
+        ShowImage(
+            drawable = R.drawable.search, modifier = Modifier
                 .size(30.dp)
-                .padding(5.dp, 5.dp, 10.dp, 5.dp))
-        }
+                .padding(5.dp, 5.dp, 10.dp, 5.dp)
+        )
     }
 }
 
 @Composable
 fun Category(navController: NavController) {
-
     LaunchedEffect(Unit) {
         categories = getCategories()
     }
-
-    Row(modifier = Modifier
-        .horizontalScroll(rememberScrollState())
-        .fillMaxWidth()) {
-        Button(onClick = {
-            actualCategory = "All"
-            products = allProducts
-        }){
-            Text(text = "All")
+    LazyRow() {
+        item {
+            ButtonCategory("All", onclick = {
+                actualCategory = "All"
+                products = allProducts
+            }, productId = "All")
         }
-        Button(onClick = {
-            actualCategory = "Favorite"
-            products = allProducts.filter { it.value.favorite }
-        }){
-            Text(text = "Favorite")
+        item {
+            ButtonCategory(textString = "Favorite", onclick = {
+                actualCategory = "Favorite"
+                products = allProducts.filter { it.value.favorite }
+            }, productId = "Favorite")
         }
         categories.forEach { (key, value) ->
-            Button(onClick = {
-                actualCategory = key
-                products = emptyMap()
-                products = allProducts.filter { it.value.category_id == key}
-            }){
-                Text(text = value)
+            item {
+                ButtonCategory(textString = value, onclick = {
+                    actualCategory = key
+                    products = allProducts.filter { it.value.category_id == key }
+                }, productId = key)
             }
         }
     }
-    if(categories.isNotEmpty())
-    {
+    if (categories.isNotEmpty()) {
         Product(navController = navController)
     }
-    else{
-        Log.d(ContentValues.TAG, "JSUIS VIIIIIIDE OUUU ?")
+}
+
+@Composable
+fun ButtonCategory(textString: String, onclick: () -> Unit, productId: String) {
+    if (actualCategory == productId) {
+        Button(
+            onClick = { onclick() },
+            colors = ButtonDefaults.buttonColors(DorsetColor)
+        ) {
+            Text(text = textString, color = Color.White)
+        }
+    } else {
+        Button(
+            onClick = { onclick() },
+            colors = ButtonDefaults.buttonColors(EpitaColor)
+        ) {
+            Text(text = textString, color = Color.Black)
+        }
     }
 }
+
+
+@Composable
+fun Product(navController: NavController) {
+    if (products.isNotEmpty()) {
+        Log.d(ContentValues.TAG, "Product: $products")
+        val productValue = products.values.toList()
+        LazyVerticalGrid(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .fillMaxHeight(0.9f),
+            columns = GridCells.Adaptive(minSize = 128.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(products.size) { index ->
+                val product = productValue[index]
+                CardProduct(product, products.keys.toList()[index], navController)
+            }
+        }
+    }
+}
+
+@Composable
+fun CardProduct(product: Product, productId: String, navController: NavController) {
+
+    Column(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .border(1.dp, Color.LightGray, MaterialTheme.shapes.large)
+            .width(160.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    )
+    {
+        CardProductContent(
+            product = product, productId = productId,
+            navController = navController
+        )
+    }
+}
+
+@Composable
+fun CardProductContent(product: Product, productId: String, navController: NavController) {
+
+    ButtonImageCard(product, productId, navController)
+    CardProductRow(product, productId, navController)
+}
+
+@Composable
+fun ButtonImageCard(product: Product, productId: String, navController: NavController) {
+    Button(
+        onClick = { navController.navigate(Routes.ProductPage.route + "/${productId}") },
+        shape = MaterialTheme.shapes.small,
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        modifier = Modifier
+            .padding(0.dp)
+            .width(160.dp)
+            .height(90.dp)
+            .background(Color.LightGray),
+        contentPadding = PaddingValues(5.dp)
+    )
+    {
+        ShowImage(
+            drawable = LocalContext.current.resources.getIdentifier(
+                product.image,
+                "drawable", "com.stu74526.project_74526"
+            ), modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun CardProductRow(product: Product, productId: String, navController: NavController) {
+    Row(
+        modifier = Modifier
+            .width(160.dp)
+            .background(Color.White),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    )
+    {
+        CardProductInsideRow(product, navController)
+    }
+}
+
+@Composable
+fun CardProductInsideRow(product: Product, navController: NavController) {
+    var isFavorite = remember(product.id) { mutableStateOf(product.favorite) }
+
+    CardProductDetails(product, product.id, navController)
+    val heartIcon = if (isFavorite.value) R.drawable.heart2 else R.drawable.heart
+    ShowImage(
+        drawable = heartIcon,
+        modifier = Modifier
+            .size(25.dp)
+            .padding(end = 5.dp, bottom = 5.dp)
+            .clickable {
+                isFavorite.value = !isFavorite.value
+                product.favorite = isFavorite.value
+                updateFavorite(product.id)
+                if (actualCategory == "Favorite")
+                    products = allProducts.filter { it.value.favorite }
+            }
+    )
+}
+
+@Composable
+fun CardProductDetails(product: Product, productId: String, navController: NavController) {
+    Column(modifier = Modifier
+        .clickable { navController.navigate(Routes.ProductPage.route + "/${productId}") }
+        .padding(start = 5.dp, bottom = 5.dp)) {
+        Text(text = product.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(text = product.price.toString() + "€", fontSize = 11.sp)
+    }
+}
+
+/* Firebase functions */
 
 suspend fun getCategories(): Map<String, String> {
     var categories = mutableMapOf<String, String>()
@@ -228,26 +346,6 @@ suspend fun getCategories(): Map<String, String> {
     return categories
 }
 
-
-@Composable
-fun Product(navController: NavController)
-{
-    if(products.isNotEmpty())
-    {
-        Log.d(ContentValues.TAG, "Product: $products")
-        val productValue = products.values.toList()
-        LazyVerticalGrid(modifier = Modifier.fillMaxWidth(0.8f).fillMaxHeight(0.9f),
-            columns = GridCells.Adaptive(minSize = 128.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(products.size) { index ->
-                val product = productValue[index]
-                CardProduct(product,   products.keys.toList()[index], navController)
-            }
-        }
-    }
-}
 suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuation ->
     val products = mutableMapOf<String, Product>()
 
@@ -271,7 +369,7 @@ suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuatio
                     "COUCOU CMOI LA DESCRIPTION DE L'ITEM :)",
                     true,
                     productCategoryId,
-                    favorite
+                    favorite, document.id
                 )
 
                 if (products.size == documents.size()) {
@@ -284,62 +382,6 @@ suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuatio
         }
     }.addOnFailureListener { exception ->
         continuation.resumeWithException(exception)
-    }
-}
-
-
-
-@Composable
-fun CardProduct(product : Product, productId : String, navController: NavController)
-{
-    var isFavorite = remember(productId) { mutableStateOf(product.favorite) }
-
-    Column(modifier = Modifier
-        .clip(MaterialTheme.shapes.large)
-        .width(150.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally)
-    {
-        Button(
-            onClick = { navController.navigate(Routes.ProductPage.route + "/${productId}") },
-            shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(Color.Transparent),
-            modifier = Modifier
-                .padding(0.dp)
-                .width(150.dp)
-                .height(90.dp)
-                .background(Color.LightGray),
-            contentPadding = PaddingValues(5.dp)
-        )
-        {
-            ShowImage(drawable = LocalContext.current.resources.getIdentifier(product.image,
-                "drawable", "com.stu74526.project_74526"), modifier = Modifier.fillMaxSize())
-        }
-        Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically)
-        {
-
-            Column(modifier = Modifier
-                .clickable { }
-                .padding(start = 5.dp, bottom = 5.dp)) {
-                Text(text = product.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                Text(text = product.price.toString() + " $", fontSize = 11.sp)
-            }
-
-            val heartIcon = if (isFavorite.value) R.drawable.heart2 else R.drawable.heart
-            ShowImage(
-                drawable = heartIcon,
-                modifier = Modifier
-                    .size(25.dp)
-                    .padding(end = 5.dp, bottom = 5.dp)
-                    .clickable {
-                        isFavorite.value = !isFavorite.value
-                        product.favorite = isFavorite.value
-                        updateFavorite(productId)
-                    }
-            )
-        }
     }
 }
 
