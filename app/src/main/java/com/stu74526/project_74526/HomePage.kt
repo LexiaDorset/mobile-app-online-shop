@@ -68,14 +68,24 @@ fun HomePage(navController: NavController) {
         navController.navigate(Routes.LoginPage.route)
         return
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        HomeContent(navController = navController)
+    var isNavigationReady by remember { mutableStateOf(collectionsSet) }
+
+    LaunchedEffect(Unit) {
+        productsCart = getProductCart()
+        orders = getOrders()
+        isNavigationReady = true
+        collectionsSet = true
+    }
+    if (isNavigationReady) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            HomeContent(navController = navController)
+        }
     }
 }
 
@@ -92,7 +102,9 @@ fun HomeContent(navController: NavController) {
         //SearchBar()
         Category(navController = navController)
     }
-    BottomBarGlobal(cart = { navController.navigate(Routes.CartPage.route) })
+    BottomBarGlobal(cart = { navController.navigate(Routes.CartPage.route) },
+        historic = { navController.navigate(Routes.OrderPage.route) },
+        profile = { navController.navigate(Routes.ProfilePage.route) })
 }
 
 @Composable
@@ -369,6 +381,7 @@ suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuatio
             val productImage = getProductImage(ddata)
             val productCategoryId = getProductCategoryId(ddata)
             val productPrice = getProductPrice(ddata)
+            val productDescription = getProductDescription(ddata)
 
             val favoriteQuery = favoriteCollection
                 .whereEqualTo(favoriteUserId, userId)
@@ -380,7 +393,7 @@ suspend fun getProducts(): Map<String, Product> = suspendCoroutine { continuatio
                     productName,
                     productImage,
                     productPrice,
-                    "COUCOU CMOI LA DESCRIPTION DE L'ITEM :)",
+                    productDescription,
                     true,
                     productCategoryId,
                     favorite, document.id

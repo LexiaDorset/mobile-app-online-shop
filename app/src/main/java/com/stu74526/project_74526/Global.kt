@@ -1,5 +1,6 @@
 package com.stu74526.project_74526
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.stu74526.project_74526.ui.theme.RoyalBlue
@@ -35,9 +38,15 @@ var allProducts by mutableStateOf(emptyMap<String, Product>())
 
 var productsCart by mutableStateOf(mutableMapOf<String, Int>())
 
-//var productsCart = mutableMapOf<String, Int>()
+var orders by mutableStateOf(emptyMap<String, Order>())
 
 var sizeIconBottomBar = 40.dp
+
+var sizeProduct = mutableIntStateOf(0)
+
+var currentUserClass: User = User()
+
+var collectionsSet = false
 
 @Composable
 fun DisplayImageFromUrl(url: String, modifier: Modifier = Modifier) {
@@ -98,8 +107,6 @@ fun BottomBarGlobal(
     cart: () -> Unit = {},
     profile: () -> Unit = {}
 ) {
-    val productsCart by remember { mutableStateOf(productsCart) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -117,7 +124,7 @@ fun BottomBarGlobal(
             home = home,
             historic = historic,
             profile = profile,
-            productCart = productsCart.size
+            productCart = sizeProduct.intValue
         )
     }
 }

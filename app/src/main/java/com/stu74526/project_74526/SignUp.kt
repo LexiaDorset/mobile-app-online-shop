@@ -46,13 +46,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 var emailSign by mutableStateOf("")
-    private set
-
 var passwordSign by mutableStateOf("")
-    private set
-
 var usernameSign by mutableStateOf("")
-    private set
+var firstNameSign by mutableStateOf("")
+var lastNameSign by mutableStateOf("")
+var phoneSign by mutableStateOf("")
+var numberSign by mutableStateOf("")
+var streetSign by mutableStateOf("")
+var citySign by mutableStateOf("")
+var zipcodeSign by mutableStateOf("")
+var latSign by mutableStateOf("")
+var lgnSign by mutableStateOf("")
 
 fun seEmailSign(Email: String) {
     emailSign = Email
@@ -63,101 +67,158 @@ fun sePasswordSign(Password: String) {
 }
 
 @Composable
-fun SignUp(navController: NavController)
-{
+fun SignUp(navController: NavController) {
     MainSignUp(lightGray, white, lightBlack, black, navController)
 }
 
 @Composable
-fun MainSignUp(mainColor : Color,
-               secondColor: Color,
-               thirdColor: Color,
-               fourColor: Color, navController: NavController) // Main function for sign up page
+fun MainSignUp(
+    mainColor: Color,
+    secondColor: Color,
+    thirdColor: Color,
+    fourColor: Color, navController: NavController
+) // Main function for sign up page
 {
-    Column (modifier = Modifier
-        .background(mainColor)
-        .fillMaxHeight()
-        .fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .background(mainColor)
+            .fillMaxHeight()
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center)
+        verticalArrangement = Arrangement.Center
+    )
     {
         // Logo with image of lock screen
-        ShowImage(R.drawable.imagelogin,Modifier.padding(bottom=30.dp))
+        ShowImage(R.drawable.imagelogin, Modifier.padding(bottom = 30.dp))
 
         // First Text for welcome the user
-        MainText("Let's create an account for you!",thirdColor)
+        MainText("Let's create an account for you!", thirdColor)
 
         // Part with TextField, Login Button and icons
         BoxesPartSign(secondColor, thirdColor, fourColor, navController = navController)
 
         // End with Text
-        FinalPart("Already a member?"," Login now",
+        FinalPart(
+            "Already a member?", " Login now",
             thirdColor, modifier = Modifier.padding(top = 35.dp),
-            navController = navController, page = Routes.LoginPage.route)
+            onclick = { navController.popBackStack(Routes.LoginPage.route, true) }
+        )
     }
 }
 
 @Composable
-fun BoxesPartSign(sColor: Color, tColor: Color, fColor: Color, navController: NavController) // Text fields and Sign Up Button
+fun BoxesPartSign(
+    sColor: Color,
+    tColor: Color,
+    fColor: Color,
+    navController: NavController
+) // Text fields and Sign Up Button
 {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(start = 50.dp, end = 50.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 50.dp, end = 50.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         TextFieldPartSignUp(sColor, tColor)
         BigButton2("Sign Up", sColor, fColor, navController = navController)
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFieldPartSignUp(sColor: Color, tColor: Color) // Text fields for email, password and confirm
 {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .height(200.dp)
-        .padding(bottom = 20.dp)
-        ,horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(320.dp)
+            .padding(bottom = 20.dp), horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
         OutlinedTextField(
             value = emailSign,
-            onValueChange = { seEmailSign(it)
+            onValueChange = {
+                seEmailSign(it)
             },
             modifier = Modifier
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors
-                ( focusedBorderColor = tColor,
+                (
+                focusedBorderColor = tColor,
                 unfocusedBorderColor = tColor,
                 focusedPlaceholderColor = tColor,
                 unfocusedPlaceholderColor = tColor,
-                containerColor = sColor),
+                containerColor = sColor
+            ),
             placeholder = { Text(text = "Email") },
         )
         OutlinedTextField(
             value = usernameSign,
-            onValueChange = { usernameSign = it
+            onValueChange = {
+                usernameSign = it
             },
             modifier = Modifier
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors
-                ( focusedBorderColor = tColor,
+                (
+                focusedBorderColor = tColor,
                 unfocusedBorderColor = tColor,
                 focusedPlaceholderColor = tColor,
                 unfocusedPlaceholderColor = tColor,
-                containerColor = sColor),
+                containerColor = sColor
+            ),
             placeholder = { Text(text = "Username") },
         )
         OutlinedTextField(
-            value = passwordSign,
-            onValueChange = { sePasswordSign(it)
+            value = firstNameSign,
+            onValueChange = {
+                firstNameSign = it
             },
             modifier = Modifier
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors
-                ( focusedBorderColor = tColor,
+                (
+                focusedBorderColor = tColor,
                 unfocusedBorderColor = tColor,
                 focusedPlaceholderColor = tColor,
                 unfocusedPlaceholderColor = tColor,
-                containerColor = sColor),
+                containerColor = sColor
+            ),
+            placeholder = { Text(text = "First Name") },
+        )
+        OutlinedTextField(
+            value = lastNameSign,
+            onValueChange = {
+                lastNameSign = it
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors
+                (
+                focusedBorderColor = tColor,
+                unfocusedBorderColor = tColor,
+                focusedPlaceholderColor = tColor,
+                unfocusedPlaceholderColor = tColor,
+                containerColor = sColor
+            ),
+            placeholder = { Text(text = "Last Name") },
+        )
+        OutlinedTextField(
+            value = passwordSign,
+            onValueChange = {
+                sePasswordSign(it)
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors
+                (
+                focusedBorderColor = tColor,
+                unfocusedBorderColor = tColor,
+                focusedPlaceholderColor = tColor,
+                unfocusedPlaceholderColor = tColor,
+                containerColor = sColor
+            ),
             placeholder = { Text(text = "Password") },
         )
 
@@ -165,21 +226,34 @@ fun TextFieldPartSignUp(sColor: Color, tColor: Color) // Text fields for email, 
 }
 
 @Composable
-fun BigButton2(textString: String, sColor: Color, fColor: Color, navController: NavController) // Login or Sign Up Button
+fun BigButton2(
+    textString: String,
+    sColor: Color,
+    fColor: Color,
+    navController: NavController
+) // Login or Sign Up Button
 {
     val context = LocalContext.current
     val activity = context as MainActivity
     Button(
         onClick =
-            {
-                activity.createAccount(emailSign, passwordSign, usernameSign, navController)
-            }, Modifier.fillMaxWidth(),
+        {
+            activity.createAccount(
+                emailSign, passwordSign, usernameSign,
+                firstNameSign, lastNameSign, phoneSign, numberSign,
+                streetSign, citySign, zipcodeSign, latSign, lgnSign,
+                navController
+            )
+        },
+        Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(sColor),
     )
     {
-        CustomText(textString, color= fColor,
-            fontSize = 20.sp,fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(all=10.dp))
+        CustomText(
+            textString, color = fColor,
+            fontSize = 20.sp, fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(all = 10.dp)
+        )
     }
 }

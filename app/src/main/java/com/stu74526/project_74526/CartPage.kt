@@ -1,7 +1,6 @@
 package com.stu74526.project_74526
 
-import android.content.ContentValues
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,15 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -33,13 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Timestamp
 import com.stu74526.project_74526.ui.theme.DorsetColor
-import kotlin.math.roundToInt
+import java.util.Date
 
 var totalCart = 0.0
 
@@ -54,13 +52,14 @@ fun CartMain(navController: NavController) {
     ) {
         AppBar()
         OrderBody()
-        BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) })
+        BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
+            historic = { navController.navigate(Routes.OrderPage.route) },
+            profile = { navController.navigate(Routes.ProfilePage.route) })
     }
 }
 
 @Composable
 fun OrderBody() {
-
     Column(
         modifier = Modifier.fillMaxHeight(0.8f),
         verticalArrangement = Arrangement.SpaceBetween,
@@ -68,16 +67,14 @@ fun OrderBody() {
     )
     {
         val totalM = remember { mutableDoubleStateOf(totalCart) }
-        // Utilisez un LaunchedEffect pour observer les changements de productsCart
-        LaunchedEffect(productsCart) {
-            Log.d(ContentValues.TAG, "productsCart changed: $productsCart")
-        }
+        val productCartKeys = productsCart.keys
+
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.fillMaxHeight(0.8f)
         )
         {
-            productsCart.keys.forEach {
+            productCartKeys.forEach {
                 val product = allProducts[it]
                 if (product != null) {
                     item {
@@ -87,7 +84,6 @@ fun OrderBody() {
                             totalM
                         )
                     }
-                    Log.d(ContentValues.TAG, "Recompose: $product")
                 }
             }
         }
@@ -123,9 +119,26 @@ fun OrderBody() {
                     )
                 }
             }
-
+            val context = LocalContext.current
+            val activity = context as MainActivity
             Button(
-                onClick = { },
+                onClick = {
+                    if (productsCart.isNotEmpty()) {
+                        val orderData: HashMap<String, Any?> = hashMapOf(
+                            orderUserId to userId,
+                            orderTotal to totalCart,
+                            orderDate to java.util.Date()
+                        )
+                        addOrder(orderData, totalM)
+                    } else {
+
+                        Toast.makeText(
+                            activity.baseContext,
+                            "Your cart is empty",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(DorsetColor),
                 modifier = Modifier.clip(MaterialTheme.shapes.small)
             ) {
@@ -200,10 +213,11 @@ fun CardProductOrder(product: Product, quantity: Int, totalM: MutableDoubleState
             ) {
                 Button(
                     onClick = {
+                        removeProductCart(product.id)
                         productsCart.remove(product.id)
                         totalCart -= price
                         totalM.doubleValue = totalCart
-                        removeProductCart(product.id)
+                        sizeProduct.intValue -= 1
                     },
                     modifier = Modifier
                         .padding(bottom = 5.dp)

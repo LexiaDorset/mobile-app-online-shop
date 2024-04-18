@@ -26,7 +26,8 @@ fun Navigation() {
         {
             HomePage(navController = navController)
         }
-        composable(route = Routes.ProductPage.route + "/{productId}",
+        composable(
+            route = Routes.ProductPage.route + "/{productId}",
             arguments = listOf(navArgument("productId") { defaultValue = "0" })
         )
         { backStackEntry ->
@@ -38,6 +39,28 @@ fun Navigation() {
         composable(route = Routes.CartPage.route)
         {
             CartMain(navController = navController)
+        }
+        composable(route = Routes.OrderPage.route)
+        {
+            MainOrderPage(navController = navController)
+        }
+        composable(
+            route = Routes.OrderProductPage.route + "/{orderId}",
+            arguments = listOf(navArgument("orderId") { defaultValue = "0" })
+        )
+        { backStackEntry ->
+            OrderProductMain(
+                navController = navController,
+                backStackEntry.arguments?.getString("orderId")
+            )
+        }
+        composable(route = Routes.ProfilePage.route)
+        {
+            ProfileMain(navController)
+        }
+        composable(route = Routes.SettingsPage.route)
+        {
+            SettingsMain(navController)
         }
     }
 }

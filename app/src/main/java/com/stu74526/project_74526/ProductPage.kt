@@ -1,6 +1,5 @@
 package com.stu74526.project_74526
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -51,14 +50,18 @@ fun ProductMain(navController: NavController, productId: String?) {
             ) {
                 ProductImage(product = product, navController = navController)
                 ProductBody(product = product)
-                BottomBarGlobal(home = { navController.popBackStack(Routes.HomePage.route, false) },
-                    cart = { navController.navigate(Routes.CartPage.route) })
+                BottomBarGlobal(home = { navController.popBackStack() },
+                    historic = { navController.navigate(Routes.OrderPage.route) },
+                    cart = { navController.navigate(Routes.CartPage.route) },
+                    profile = { navController.navigate(Routes.ProfilePage.route) })
             }
         } else {
-            navController.popBackStack(Routes.HomePage.route, false)
+            HomePage(navController = navController)
+            //navController.popBackStack(Routes.HomePage.route, false)
         }
     } else {
-        navController.popBackStack(Routes.HomePage.route, false)
+        HomePage(navController = navController)
+        // navController.popBackStack(Routes.HomePage.route, false)
     }
 }
 
@@ -83,7 +86,7 @@ fun ProductImage(product: Product, navController: NavController) {
 fun BackButton(navController: NavController) {
     Button(
         onClick = {
-            navController.popBackStack(Routes.HomePage.route, false)
+            navController.popBackStack()
         },
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -113,93 +116,113 @@ fun ProductBody(product: Product) {
     }
 
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.8f)
-            .padding(20.dp), verticalArrangement = Arrangement.SpaceBetween
+            .fillMaxHeight(0.82f)
+            .padding(top = 20.dp, end = 20.dp, start = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     )
     {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = product.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(
-                text = product.price.toString() + "€",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Text(text = product.description, fontSize = 20.sp)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        item {
             Row(
-                modifier = Modifier.fillMaxWidth(0.4f),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            )
-            {
-                if (actualQuantity > 1) {
-                    ButtonsQuantity(onClick = { actualQuantity -= 1 }, "-")
-                } else {
-                    ButtonsQuantity(onClick = { actualQuantity -= 1 }, "-", enabled = false)
-                }
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = product.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    text = actualQuantity.toString(),
+                    text = product.price.toString() + "€",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
-                ButtonsQuantity(onClick = { actualQuantity += 1 }, "+")
             }
-            val heartIcon = if (isFavorite.value) R.drawable.heart2 else R.drawable.heart
-            ShowImage(
-                drawable = heartIcon,
+            if (product.description.count() > 350) {
+                var expanded by remember { mutableStateOf(false) }
+                Text(
+                    text = if (expanded) product.description else product.description.take(300) + "...",
+                    fontSize = 19.sp,
+                    modifier = Modifier.clickable { expanded = !expanded }
+                )
+            } else {
+                Text(
+                    text = product.description,
+                    fontSize = 19.sp
+                )
+            }
+
+            Row(
                 modifier = Modifier
-                    .size(25.dp)
-                    .padding(end = 5.dp, bottom = 5.dp)
-                    .clickable {
-                        isFavorite.value = !isFavorite.value
-                        product.favorite = isFavorite.value
-                        updateFavorite(product.id)
-                        if (actualCategory == "Favorite")
-                            products = allProducts.filter { it.value.favorite }
-                    }
-            )
-        }
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = {
-                    val productCartData: HashMap<String, Any?> = hashMapOf(
-                        "product_id" to product.id,
-                        "user_id" to userId,
-                        "quantity" to actualQuantity,
-                    )
-                    if (productsCart.containsKey(product.id)) {
-                        totalCart -= product.price * productsCart[product.id]!!
-                        totalCart += product.price * actualQuantity
-                        updateProductCart(productCartData)
-                    } else {
-                        totalCart += product.price * actualQuantity
-                        addProductCart(productCartData)
-                    }
-                    productsCart[product.id] = actualQuantity
-
-                }, modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .clip(MaterialTheme.shapes.small)
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Add to Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.4f),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                )
+                {
+                    if (actualQuantity > 1) {
+                        ButtonsQuantity(onClick = { actualQuantity -= 1 }, "-")
+                    } else {
+                        ButtonsQuantity(onClick = { actualQuantity -= 1 }, "-", enabled = false)
+                    }
+                    Text(
+                        text = actualQuantity.toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    ButtonsQuantity(onClick = { actualQuantity += 1 }, "+")
+                }
+                val heartIcon = if (isFavorite.value) R.drawable.heart2 else R.drawable.heart
+                ShowImage(
+                    drawable = heartIcon,
+                    modifier = Modifier
+                        .size(25.dp)
+                        .padding(end = 5.dp, bottom = 5.dp)
+                        .clickable {
+                            isFavorite.value = !isFavorite.value
+                            product.favorite = isFavorite.value
+                            updateFavorite(product.id)
+                            if (actualCategory == "Favorite")
+                                products = allProducts.filter { it.value.favorite }
+                        }
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = {
+                        val productCartData: HashMap<String, Any?> = hashMapOf(
+                            "product_id" to product.id,
+                            "user_id" to userId,
+                            "quantity" to actualQuantity,
+                        )
+                        if (productsCart.containsKey(product.id)) {
+                            totalCart -= product.price * productsCart[product.id]!!
+                            totalCart += product.price * actualQuantity
+                            updateProductCart(productCartData)
+                        } else {
+                            totalCart += product.price * actualQuantity
+                            addProductCart(productCartData)
+                        }
+                        productsCart[product.id] = actualQuantity
+                        sizeProduct.intValue += 1
+
+                    }, modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .clip(MaterialTheme.shapes.small)
+                ) {
+                    Text(text = "Add to Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
-
     }
 }
 

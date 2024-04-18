@@ -30,34 +30,58 @@ class MainActivity : ComponentActivity() {
         auth = Firebase.auth
         currentUser = FirebaseAuth.getInstance().currentUser
         // Get the good user with user_id in userCollection
-        Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
+        //Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
         if (currentUser != null) {
             val userId_ = currentUser!!.uid
             userCollection.whereEqualTo(userUserId, userId_).get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
                         userId = document.id
-                        Log.d(ContentValues.TAG, "userId: ${document.id}")
+                        var ddata = document.data
+                        currentUserClass = User(
+                            username = getUserUsername(ddata),
+                            firstName = getUserFirstName(ddata),
+                            lastName = getUserLastName(ddata),
+                            email = getUserEmail(ddata),
+                            phone = getUserPhone(ddata),
+                            number = getUserNumber(ddata),
+                            street = getUserStreet(ddata),
+                            city = getUserCity(ddata),
+                            zipCode = getUserZipcode(ddata),
+                            imageP = "https://thispersondoesnotexist.com/image",
+                            lat = getUserLat(ddata),
+                            lng = getUserLng(ddata),
+                        )
+                        collectionsSet = true
+                        usernameSign = currentUserClass.username
+                        firstNameSign = currentUserClass.firstName
+                        lastNameSign = currentUserClass.lastName
+                        phoneSign = currentUserClass.phone
+                        citySign = currentUserClass.city
+                        numberSign = currentUserClass.number
+                        streetSign = currentUserClass.street
+                        zipcodeSign = currentUserClass.zipCode
+                        latSign = currentUserClass.lat
+                        lgnSign = currentUserClass.lng
                         return@addOnSuccessListener
                     }
                 }
-
-
         }
         setContent {
             var isNavigationReady by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
                 products = getProducts()
-                productsCart = getProductCart()
+                if (currentUser != null) {
+                    productsCart = getProductCart()
+                    orders = getOrders()
+                }
                 isNavigationReady = true
             }
 
             if (isNavigationReady) {
                 Navigation()
             }
-
-            Log.d(ContentValues.TAG, "onCreate: ${currentUser?.email}")
         }
     }
 
@@ -89,9 +113,40 @@ class MainActivity : ComponentActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(ContentValues.TAG, "signInWithEmail:success")
-                    val user = auth.currentUser
+                    currentUser = auth.currentUser
+                    userCollection.whereEqualTo(userUserId, currentUser!!.uid).get()
+                        .addOnSuccessListener { documents ->
+                            for (document in documents) {
+                                userId = document.id
+                                var ddata = document.data
+                                currentUserClass = User(
+                                    username = getUserUsername(ddata),
+                                    firstName = getUserFirstName(ddata),
+                                    lastName = getUserLastName(ddata),
+                                    email = getUserEmail(ddata),
+                                    phone = getUserPhone(ddata),
+                                    number = getUserNumber(ddata),
+                                    street = getUserStreet(ddata),
+                                    city = getUserCity(ddata),
+                                    zipCode = getUserZipcode(ddata),
+                                    imageP = "https://thispersondoesnotexist.com/image",
+                                    lat = getUserLat(ddata),
+                                    lng = getUserLng(ddata),
+                                )
+                                usernameSign = currentUserClass.username
+                                firstNameSign = currentUserClass.firstName
+                                lastNameSign = currentUserClass.lastName
+                                phoneSign = currentUserClass.phone
+                                citySign = currentUserClass.city
+                                numberSign = currentUserClass.number
+                                streetSign = currentUserClass.street
+                                zipcodeSign = currentUserClass.zipCode
+                                latSign = currentUserClass.lat
+                                lgnSign = currentUserClass.lng
+                                return@addOnSuccessListener
+                            }
+                        }
                     navController.navigate(Routes.HomePage.route)
-                    updateUI(user)
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(ContentValues.TAG, "signInWithEmail:failure", task.exception)
@@ -100,19 +155,23 @@ class MainActivity : ComponentActivity() {
                         "Authentication failed.",
                         Toast.LENGTH_SHORT,
                     ).show()
-                    updateUI(null)
                 }
             }
         // [END sign_in_with_email]
-    }
-
-    private fun updateUI(user: FirebaseUser?) {
     }
 
     public fun createAccount(
         email: String,
         password: String,
         username: String,
+        firstName: String,
+        lastName: String,
+        phone: String,
+        number: String,
+        street: String, city: String,
+        zipcode: String,
+        lat: String,
+        lont: String,
         navController: NavController
     ) {
         // [START create_user_with_email]
@@ -131,13 +190,33 @@ class MainActivity : ComponentActivity() {
                     Log.d(TAG, "createUserWithEmail:success")
                     val user = auth.currentUser
                     val userAdd = hashMapOf(
-                        "email" to email,
-                        "username" to username,
-                        "user_id" to user!!.uid
+                        userEmail to email,
+                        userUsername to username,
+                        userUserId to user!!.uid,
+                        userFirstName to firstName,
+                        userLastName to lastName,
+                        userPhone to phone,
+                        userCity to city,
+                        userNumber to number,
+                        userStreet to street,
+                        userZipcode to zipcode,
+                        userLat to lat,
+                        userLng to lont
                     )
                     addUser(userAdd)
                     navController.navigate(Routes.HomePage.route)
-                    updateUI(user)
+                    currentUserClass = User(
+                        username = username,
+                        firstName = firstName,
+                        lastName = lastName,
+                        email = email,
+                        phone = phone,
+                        street = street,
+                        number = number,
+                        city = city,
+                        zipCode = zipcode,
+                        imageP = "https://thispersondoesnotexist.com/image",
+                    )
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -146,11 +225,26 @@ class MainActivity : ComponentActivity() {
                         "Authentication failed.",
                         Toast.LENGTH_SHORT,
                     ).show()
-                    updateUI(null)
                 }
             }
         // [END create_user_with_email]
     }
 
-
+    fun signOut(navController: NavController) {
+        auth.signOut()
+        currentUserClass = User()
+        userId = null.toString()
+        currentUser = null
+        usernameSign = ""
+        firstNameSign = ""
+        lastNameSign = ""
+        phoneSign = ""
+        citySign = ""
+        numberSign = ""
+        streetSign = ""
+        zipcodeSign = ""
+        latSign = ""
+        lgnSign = ""
+        navController.navigate(Routes.LoginPage.route)
+    }
 }
