@@ -69,12 +69,13 @@ fun HomePage(navController: NavController) {
         return
     }
     var isNavigationReady by remember { mutableStateOf(collectionsSet) }
-
-    LaunchedEffect(Unit) {
-        productsCart = getProductCart()
-        orders = getOrders()
-        isNavigationReady = true
-        collectionsSet = true
+    if (!collectionsSet) {
+        LaunchedEffect(Unit) {
+            productsCart = getProductCart()
+            orders = getOrders()
+            isNavigationReady = true
+            collectionsSet = true
+        }
     }
     if (isNavigationReady) {
         Column(
@@ -98,7 +99,7 @@ fun HomeContent(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     )
     {
-        AppBar()
+        AppBar(navController)
         //SearchBar()
         Category(navController = navController)
     }
@@ -108,7 +109,7 @@ fun HomeContent(navController: NavController) {
 }
 
 @Composable
-fun AppBar() {
+fun AppBar(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,6 +124,7 @@ fun AppBar() {
             "https://thispersondoesnotexist.com/", modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
+                .clickable { navController.navigate(Routes.ProfilePage.route) }
         )
     }
 }

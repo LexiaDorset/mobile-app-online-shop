@@ -62,5 +62,9 @@ fun Navigation() {
         {
             SettingsMain(navController)
         }
+        composable(route = Routes.AboutPage.route)
+        {
+            AboutPage(navController)
+        }
     }
 }

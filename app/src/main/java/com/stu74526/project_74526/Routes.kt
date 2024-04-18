@@ -10,4 +10,5 @@ sealed class Routes(val route: String) {
     object OrderProductPage : Routes("order_page/{orderId}")
     object ProfilePage : Routes("profile_page")
     object SettingsPage : Routes("settings_page")
+    object AboutPage : Routes("about_page")
 }

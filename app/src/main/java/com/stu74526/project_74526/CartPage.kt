@@ -50,7 +50,7 @@ fun CartMain(navController: NavController) {
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AppBar()
+        AppBar(navController)
         OrderBody()
         BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
             historic = { navController.navigate(Routes.OrderPage.route) },

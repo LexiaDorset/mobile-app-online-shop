@@ -97,7 +97,7 @@ fun ProfileBody(navController: NavController) {
             activity.signOut(navController)
         })
 
-        CustomBox("About this app")
+        CustomBox("About this app", onclick = { navController.navigate(Routes.AboutPage.route) })
     }
 }
 
