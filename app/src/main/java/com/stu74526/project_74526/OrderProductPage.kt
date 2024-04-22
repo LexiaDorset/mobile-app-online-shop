@@ -100,7 +100,7 @@ fun OrderProductTotal(order: Order, euros: Int, cents: Int) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "${order.products.size} items",
+            text = "${order.products.size} product(s)",
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Gray
@@ -146,7 +146,9 @@ fun OrderProductBody(order: Order, navController: NavController) {
                     OrderProductInside(
                         navController = navController,
                         it = it,
-                        actualProduct = actualProduct
+                        actualProduct = actualProduct,
+                        euros = euros,
+                        cents = cents
                     )
                 }
             }
@@ -158,7 +160,7 @@ fun OrderProductBody(order: Order, navController: NavController) {
 fun OrderProductInside(
     navController: NavController,
     it: Map.Entry<String, Int>,
-    actualProduct: Product,
+    actualProduct: Product, euros: Int, cents: Int
 ) {
     Row(
         modifier = Modifier
@@ -175,8 +177,8 @@ fun OrderProductInside(
         OrderProductCover(image = actualProduct.image)
         OrderProductInsideDetails(
             actualProduct = actualProduct,
-            euros = actualProduct.price.toInt(),
-            cents = ((actualProduct.price - actualProduct.price.toInt()) * 100).toInt(),
+            euros = euros,
+            cents = cents,
             it = it
         )
     }

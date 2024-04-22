@@ -209,7 +209,6 @@ class MainActivity : ComponentActivity() {
                         userLng to lont
                     )
                     addUser(userAdd)
-                    navController.navigate(Routes.HomePage.route)
                     currentUserClass = User(
                         username = username,
                         firstName = firstName,
@@ -222,6 +221,8 @@ class MainActivity : ComponentActivity() {
                         zipCode = zipcode,
                         imageP = "https://thispersondoesnotexist.com/image",
                     )
+                    currentUser = FirebaseAuth.getInstance().currentUser
+
                     navigateOrPop(navController = navController, route = Routes.HomePage.route)
                 } else {
                     // If sign in fails, display a message to the user.

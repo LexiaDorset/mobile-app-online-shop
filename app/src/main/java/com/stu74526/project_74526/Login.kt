@@ -192,7 +192,7 @@ fun BoxesPart(
             .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextFieldPart(sColor, tColor)
-        TextPassword(tColor)
+        //TextPassword(tColor)
         BigButton("Login", sColor, fColor, navController = navController)
     }
 }
@@ -257,6 +257,7 @@ fun TextFieldPart(sColor: Color, tColor: Color) // Text fields for email and pas
                 containerColor = sColor
             ),
             placeholder = { Text(text = "Password") },
+            visualTransformation = PasswordVisualTransformation(),
         )
 
     }
