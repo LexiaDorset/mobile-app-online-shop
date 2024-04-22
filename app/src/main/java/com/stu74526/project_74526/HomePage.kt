@@ -103,9 +103,13 @@ fun HomeContent(navController: NavController) {
         //SearchBar()
         Category(navController = navController)
     }
-    BottomBarGlobal(cart = { navController.navigate(Routes.CartPage.route) },
-        historic = { navController.navigate(Routes.OrderPage.route) },
-        profile = { navController.navigate(Routes.ProfilePage.route) })
+    BottomBarGlobal(cart = {
+        navigateOrPop(navController, Routes.CartPage.route)
+    }, historic = {
+        navigateOrPop(navController, Routes.OrderPage.route)
+    }, profile = {
+        navigateOrPop(navController, Routes.ProfilePage.route)
+    })
 }
 
 @Composable

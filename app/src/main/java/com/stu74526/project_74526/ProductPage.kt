@@ -52,9 +52,13 @@ fun ProductMain(navController: NavController, productId: String?) {
                 ProductImage(product = product, navController = navController)
                 ProductBody(product = product)
                 BottomBarGlobal(home = { navController.popBackStack() },
-                    historic = { navController.navigate(Routes.OrderPage.route) },
-                    cart = { navController.navigate(Routes.CartPage.route) },
-                    profile = { navController.navigate(Routes.ProfilePage.route) })
+                    cart = {
+                        navigateOrPop(navController, Routes.CartPage.route)
+                    },
+                    historic = {
+                        navigateOrPop(navController, Routes.OrderPage.route)
+                    },
+                    profile = { navigateOrPop(navController, Routes.ProfilePage.route) })
             }
         } else {
             HomePage(navController = navController)

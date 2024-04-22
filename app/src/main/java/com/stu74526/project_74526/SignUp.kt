@@ -101,7 +101,7 @@ fun MainSignUp(
         FinalPart(
             "Already a member?", " Login now",
             thirdColor, modifier = Modifier.padding(top = 35.dp),
-            onclick = { navController.popBackStack(Routes.LoginPage.route, true) }
+            onclick = { navigateOrPop(navController, Routes.LoginPage.route) }
         )
     }
 }

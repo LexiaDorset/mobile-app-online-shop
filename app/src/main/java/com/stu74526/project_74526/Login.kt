@@ -113,7 +113,7 @@ fun MainLogin(
         FinalPart("Not a member?",
             " Register now", thirdColor,
             modifier = Modifier.padding(top = 35.dp),
-            onclick = { navController.navigate(Routes.SignUpPage.route) })
+            onclick = { navigateOrPop(navController, Routes.SignUpPage.route) })
     }
 }
 

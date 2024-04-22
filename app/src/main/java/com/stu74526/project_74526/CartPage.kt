@@ -52,9 +52,12 @@ fun CartMain(navController: NavController) {
     ) {
         AppBar(navController)
         OrderBody()
-        BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
-            historic = { navController.navigate(Routes.OrderPage.route) },
-            profile = { navController.navigate(Routes.ProfilePage.route) })
+        BottomBarGlobal(home = { navigateOrPop(navController, Routes.HomePage.route) },
+            historic = {
+                navigateOrPop(navController, Routes.OrderPage.route)
+            }, profile = {
+                navigateOrPop(navController, Routes.ProfilePage.route)
+            })
     }
 }
 

@@ -45,10 +45,14 @@ fun AboutPage(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AboutMain()
-
-            BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
-                historic = { navController.navigate(Routes.OrderPage.route) },
-                cart = { navController.navigate(Routes.CartPage.route) },
+            
+            BottomBarGlobal(home = { navigateOrPop(navController, Routes.HomePage.route) },
+                cart = {
+                    navigateOrPop(navController, Routes.CartPage.route)
+                },
+                historic = {
+                    navigateOrPop(navController, Routes.OrderPage.route)
+                },
                 profile = { navController.popBackStack() })
         }
     }

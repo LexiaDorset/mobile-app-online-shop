@@ -39,12 +39,12 @@ fun MainOrderPage(navController: NavController) {
     ) {
         AppBar(navController)
         BodyOrder(navController)
-        BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
-            historic = { navController.navigate(Routes.OrderPage.route) },
-            cart = {
-                navController.navigate(Routes.CartPage.route)
-            },
-            profile = { navController.navigate(Routes.ProfilePage.route) })
+
+        BottomBarGlobal(home = { navigateOrPop(navController, Routes.HomePage.route) }, cart = {
+            navigateOrPop(navController, Routes.CartPage.route)
+        }, profile = {
+            navigateOrPop(navController, Routes.ProfilePage.route)
+        })
     }
 }
 
@@ -91,7 +91,7 @@ fun OrderCard(order: Order, orderId: String, navController: NavController) {
     )
     {
         OrderCover(prod)
-        
+
         val euros = order.total.toInt()
         val cents = ((order.total - euros) * 100).toInt()
         ColumnTotal(prod, euros, cents)

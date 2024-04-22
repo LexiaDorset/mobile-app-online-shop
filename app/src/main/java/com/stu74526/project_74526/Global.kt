@@ -160,3 +160,12 @@ fun CartBoxMain(productCart: Int, cart: () -> Unit = {}) {
         }
     }
 }
+
+fun navigateOrPop(navController: NavController, route: String) {
+    navController.navigate(route) {
+        popUpTo(route) {
+            inclusive = true
+        }
+    }
+}
+

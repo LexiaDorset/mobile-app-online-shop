@@ -64,12 +64,14 @@ fun OrderProductBodyMain(order: Order, navController: NavController) {
 
         OrderProductBody(order = order, navController = navController)
         OrderProductBottom(order)
-        BottomBarGlobal(
-            home = { navController.navigate(Routes.HomePage.route) },
-            historic = { navController.popBackStack() },
-            cart = { navController.navigate(Routes.CartPage.route) },
-            profile = { navController.navigate(Routes.ProfilePage.route) }
-        )
+        BottomBarGlobal(home = { navigateOrPop(navController, Routes.HomePage.route) },
+            cart = {
+                navigateOrPop(navController, Routes.CartPage.route)
+            },
+            historic = {
+                navController.popBackStack()
+            },
+            profile = { navigateOrPop(navController, Routes.ProfilePage.route) })
     }
 }
 
