@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -91,53 +90,68 @@ fun OrderCard(order: Order, orderId: String, navController: NavController) {
         verticalAlignment = Alignment.CenterVertically
     )
     {
-        Box(
-            modifier = Modifier
-                .background(Color.LightGray)
-                .size(80.dp)
-                .padding(5.dp),
-        )
-        {
-            ShowImageString(
-                drawable = allProducts[prod.firstNotNullOf { it.key }]?.image ?: "",
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-        }
+        OrderCover(prod)
+        
         val euros = order.total.toInt()
         val cents = ((order.total - euros) * 100).toInt()
-        Column(modifier = Modifier.padding(10.dp))
+        ColumnTotal(prod, euros, cents)
+
+        val date = order.date.toDate()
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+        OrderDate(dateFormat.format(date))
+    }
+}
+
+@Composable
+fun OrderCover(prod: MutableMap<String, Int>) {
+    Box(
+        modifier = Modifier
+            .background(Color.LightGray)
+            .size(80.dp)
+            .padding(5.dp),
+    )
+    {
+        ShowImageString(
+            drawable = allProducts[prod.firstNotNullOf { it.key }]?.image ?: "",
+            modifier = Modifier
+                .fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun ColumnTotal(prod: MutableMap<String, Int>, euros: Int, cents: Int) {
+    Column(modifier = Modifier.padding(10.dp))
+    {
+        Text(
+            text = "${prod.size} items",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Gray
+        )
+        Row()
         {
             Text(
-                text = "${prod.size} items",
+                text = "$euros",
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                fontWeight = FontWeight.SemiBold
             )
-            Row()
-            {
-                Text(
-                    text = "$euros",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "€${cents.toString().padStart(2, '0')}",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            Text(
+                text = "€${cents.toString().padStart(2, '0')}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
-        val date = order.date.toDate()
+    }
+}
 
-        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-        val formattedDate = dateFormat.format(date)
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(text = formattedDate)
-        }
+@Composable
+fun OrderDate(formattedDate: String) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End
+    ) {
+        Text(text = formattedDate)
     }
 }

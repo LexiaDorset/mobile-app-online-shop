@@ -337,17 +337,21 @@ fun CardProductDetails(product: Product, productId: String, navController: NavCo
         val price = product.price
         val euros = price.toInt()
         val cents = ((price - euros) * 100).toInt()
+        RowPrice(euros, cents)
+    }
+}
 
-        Row {
-            Text(
-                text = euros.toString(),
-                fontSize = 16.sp
-            )
-            Text(
-                text = "€" + cents.toString().padStart(2, '0'),
-                fontSize = 12.sp
-            )
-        }
+@Composable
+fun RowPrice(euros: Int, cents: Int) {
+    Row {
+        Text(
+            text = euros.toString(),
+            fontSize = 16.sp
+        )
+        Text(
+            text = "€" + cents.toString().padStart(2, '0'),
+            fontSize = 12.sp
+        )
     }
 }
 

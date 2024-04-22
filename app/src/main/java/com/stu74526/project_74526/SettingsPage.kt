@@ -31,66 +31,74 @@ fun SettingsMain(navController: NavController) {
             .background(Color.White),
     ) {
         BackButton(navController = navController)
+        SettingsBodyMain(navController = navController)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Settings",
-                fontSize = 30.sp,
-                color = Color.Black,
-                modifier = Modifier.padding(20.dp)
-            )
-            SettingsBody(white, lightBlack)
-
-            Button(
-                onClick = {
-                    val userAdd: HashMap<String, Any?> = hashMapOf(
-                        userUsername to usernameSign,
-                        userFirstName to firstNameSign,
-                        userLastName to lastNameSign,
-                        userPhone to phoneSign,
-                        userCity to citySign,
-                        userNumber to numberSign,
-                        userStreet to streetSign,
-                        userZipcode to zipcodeSign,
-                        userLat to latSign,
-                        userLng to lgnSign
-                    )
-                    currentUserClass = User(
-                        username = usernameSign,
-                        firstName = firstNameSign,
-                        lastName = lastNameSign,
-                        email = currentUserClass.email,
-                        phone = phoneSign,
-                        number = numberSign,
-                        street = streetSign,
-                        city = citySign,
-                        zipCode = zipcodeSign,
-                        imageP = currentUserClass.imageP,
-                        lat = latSign,
-                        lng = lgnSign
-                    )
-                    updateUser(userAdd)
-                    navController.popBackStack()
-                }, colors = ButtonDefaults.buttonColors(DorsetColor),
-                modifier = Modifier.clip(MaterialTheme.shapes.small)
-            )
-            {
-                Text(text = "Update Settings", color = Color.White, fontSize = 20.sp)
-            }
-            BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
-                historic = { navController.navigate(Routes.OrderPage.route) },
-                cart = { navController.navigate(Routes.CartPage.route) },
-                profile = { navController.popBackStack() })
-        }
     }
 }
 
+@Composable
+fun SettingsBodyMain(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Settings",
+            fontSize = 30.sp,
+            color = Color.Black,
+            modifier = Modifier.padding(20.dp)
+        )
+        SettingsBody(white, lightBlack)
+        ButtonUpdateSettings(navController = navController)
+        BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
+            historic = { navController.navigate(Routes.OrderPage.route) },
+            cart = { navController.navigate(Routes.CartPage.route) },
+            profile = { navController.popBackStack() })
+    }
+}
+
+@Composable
+fun ButtonUpdateSettings(navController: NavController) {
+    Button(
+        onClick = {
+            val userAdd: HashMap<String, Any?> = hashMapOf(
+                userUsername to usernameSign,
+                userFirstName to firstNameSign,
+                userLastName to lastNameSign,
+                userPhone to phoneSign,
+                userCity to citySign,
+                userNumber to numberSign,
+                userStreet to streetSign,
+                userZipcode to zipcodeSign,
+                userLat to latSign,
+                userLng to lgnSign
+            )
+            currentUserClass = User(
+                username = usernameSign,
+                firstName = firstNameSign,
+                lastName = lastNameSign,
+                email = currentUserClass.email,
+                phone = phoneSign,
+                number = numberSign,
+                street = streetSign,
+                city = citySign,
+                zipCode = zipcodeSign,
+                imageP = currentUserClass.imageP,
+                lat = latSign,
+                lng = lgnSign
+            )
+            updateUser(userAdd)
+            navController.popBackStack()
+        }, colors = ButtonDefaults.buttonColors(DorsetColor),
+        modifier = Modifier.clip(MaterialTheme.shapes.small)
+    )
+    {
+        Text(text = "Update Settings", color = Color.White, fontSize = 20.sp)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -126,17 +126,7 @@ fun ProductBody(product: Product) {
     )
     {
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = product.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Text(
-                    text = product.price.toString() + "€",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            ProductDetailsFirst(product = product)
             if (product.description.count() > 350) {
                 var expanded by remember { mutableStateOf(false) }
                 Text(
@@ -191,41 +181,65 @@ fun ProductBody(product: Product) {
                         }
                 )
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(
-                    onClick = {
-                        val productCartData: HashMap<String, Any?> = hashMapOf(
-                            "product_id" to product.id,
-                            "user_id" to userId,
-                            "quantity" to actualQuantity,
-                        )
-                        if (productsCart.containsKey(product.id)) {
-                            totalCart -= product.price * productsCart[product.id]!!
-                            totalCart += product.price * actualQuantity
-                            updateProductCart(productCartData)
-                        } else {
-                            totalCart += product.price * actualQuantity
-                            addProductCart(productCartData)
-                        }
-                        productsCart[product.id] = actualQuantity
-                        sizeProduct.intValue += 1
-
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .clip(MaterialTheme.shapes.small),
-                    colors = ButtonDefaults.buttonColors(DorsetColor),
-                ) {
-                    Text(text = "Add to Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                }
-            }
+            ColumnAdd(product = product, actualQuantity = actualQuantity)
         }
+    }
+}
+
+@Composable
+fun ProductDetailsFirst(product: Product) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = product.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = product.price.toString() + "€",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun ColumnAdd(product: Product, actualQuantity: Int) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ButtonAddCart(product = product, actualQuantity = actualQuantity)
+    }
+}
+
+@Composable
+fun ButtonAddCart(product: Product, actualQuantity: Int) {
+    Button(
+        onClick = {
+            val productCartData: HashMap<String, Any?> = hashMapOf(
+                "product_id" to product.id,
+                "user_id" to userId,
+                "quantity" to actualQuantity,
+            )
+            if (productsCart.containsKey(product.id)) {
+                totalCart -= product.price * productsCart[product.id]!!
+                totalCart += product.price * actualQuantity
+                updateProductCart(productCartData)
+            } else {
+                totalCart += product.price * actualQuantity
+                addProductCart(productCartData)
+            }
+            productsCart[product.id] = actualQuantity
+            sizeProduct.intValue += 1
+        },
+        modifier = Modifier
+            .fillMaxWidth(0.8f)
+            .clip(MaterialTheme.shapes.small),
+        colors = ButtonDefaults.buttonColors(DorsetColor),
+    ) {
+        Text(text = "Add to Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
     }
 }
 

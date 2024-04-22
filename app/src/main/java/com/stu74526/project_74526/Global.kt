@@ -85,21 +85,6 @@ fun ShowImageString(drawable: String, modifier: Modifier = Modifier) // Show ima
     )
 }
 
-
-@Composable
-fun ShowImageScale(
-    draw: Int, modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.FillBounds
-) {
-    Image(
-        painter = painterResource(id = draw),
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = contentScale
-    )
-}
-
-
 @Composable
 fun BottomBarGlobal(
     home: () -> Unit = {},
@@ -143,24 +128,7 @@ fun BottomBar(
         .size(sizeIconBottomBar)
         .clickable { historic() })
     if (productCart > 0) {
-        Box {
-            ShowImage(drawable = R.drawable.cart, modifier = Modifier
-                .size(sizeIconBottomBar)
-                .clickable { cart() })
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.Red)
-                    .align(Alignment.TopEnd)
-                    .width(15.dp), contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = productCart.toString(),
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        CartBoxMain(productCart = productCart, cart = cart)
     } else {
         ShowImage(drawable = R.drawable.cart, modifier = Modifier
             .size(sizeIconBottomBar)
@@ -169,4 +137,26 @@ fun BottomBar(
     ShowImage(drawable = R.drawable.profile, modifier = Modifier
         .size(sizeIconBottomBar)
         .clickable { profile() })
+}
+
+@Composable
+fun CartBoxMain(productCart: Int, cart: () -> Unit = {}) {
+    Box {
+        ShowImage(drawable = R.drawable.cart, modifier = Modifier
+            .size(sizeIconBottomBar)
+            .clickable { cart() })
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(Color.Red)
+                .align(Alignment.TopEnd)
+                .width(15.dp), contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = productCart.toString(),
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }

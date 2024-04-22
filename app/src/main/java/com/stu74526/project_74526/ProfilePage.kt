@@ -39,41 +39,7 @@ fun ProfileMain(navController: NavHostController) {
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            verticalArrangement = Arrangement.SpaceAround,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxHeight(0.85f)
-        )
-        {
-            DisplayImageFromUrl(
-                "https://thispersondoesnotexist.com/", modifier = Modifier
-                    .size(200.dp)
-                    .clip(CircleShape)
-            )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceAround,
-            ) {
-                Text(
-                    text = currentUserClass.username,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${currentUserClass.firstName} ${currentUserClass.lastName}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = currentUserClass.email,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Gray
-                )
-            }
-
-            ProfileBody(navController)
-        }
+        ProfileDetails(navController)
         BottomBarGlobal(home = { navController.navigate(Routes.HomePage.route) },
             historic = { navController.navigate(Routes.OrderPage.route) },
             cart = { navController.navigate(Routes.CartPage.route) })
@@ -93,7 +59,6 @@ fun ProfileBody(navController: NavController) {
         CustomBox("Settings", onclick = { navController.navigate(Routes.SettingsPage.route) })
 
         CustomBox("Log out", onclick = {
-            // LOg out de firebase
             activity.signOut(navController)
         })
 
@@ -117,6 +82,49 @@ fun CustomBox(textString: String, onclick: () -> Unit = {}) {
             text = textString,
             fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = 10.dp)
+        )
+    }
+}
+
+@Composable
+fun ProfileDetails(navController: NavHostController) {
+    Column(
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxHeight(0.85f)
+    )
+    {
+        DisplayImageFromUrl(
+            "https://thispersondoesnotexist.com/", modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+        )
+        ProfileDetailsInside()
+        ProfileBody(navController)
+    }
+}
+
+@Composable
+fun ProfileDetailsInside() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceAround,
+    ) {
+        Text(
+            text = currentUserClass.username,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "${currentUserClass.firstName} ${currentUserClass.lastName}",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = currentUserClass.email,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Gray
         )
     }
 }
