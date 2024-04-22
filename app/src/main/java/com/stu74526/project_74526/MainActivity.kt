@@ -151,7 +151,7 @@ class MainActivity : ComponentActivity() {
                                 return@addOnSuccessListener
                             }
                         }
-                    navController.navigate(Routes.HomePage.route)
+                    navigateOrPop(navController = navController, route = Routes.HomePage.route)
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(ContentValues.TAG, "signInWithEmail:failure", task.exception)
@@ -222,6 +222,7 @@ class MainActivity : ComponentActivity() {
                         zipCode = zipcode,
                         imageP = "https://thispersondoesnotexist.com/image",
                     )
+                    navigateOrPop(navController = navController, route = Routes.HomePage.route)
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "createUserWithEmail:failure", task.exception)
