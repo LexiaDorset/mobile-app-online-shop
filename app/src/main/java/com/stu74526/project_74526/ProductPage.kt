@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.stu74526.project_74526.ui.theme.DorsetColor
 
 
 @Composable
@@ -215,9 +216,11 @@ fun ProductBody(product: Product) {
                         productsCart[product.id] = actualQuantity
                         sizeProduct.intValue += 1
 
-                    }, modifier = Modifier
+                    },
+                    modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .clip(MaterialTheme.shapes.small)
+                        .clip(MaterialTheme.shapes.small),
+                    colors = ButtonDefaults.buttonColors(DorsetColor),
                 ) {
                     Text(text = "Add to Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 }

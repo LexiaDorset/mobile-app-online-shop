@@ -130,6 +130,12 @@ fun OrderBody() {
                             orderDate to java.util.Date()
                         )
                         addOrder(orderData, totalM)
+                        sizeProduct.intValue = 0
+                        Toast.makeText(
+                            activity.baseContext,
+                            "Order placed successfully",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     } else {
 
                         Toast.makeText(
