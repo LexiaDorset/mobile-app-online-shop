@@ -1,10 +1,17 @@
-# Project Mobile App
+# LexiaDorset - Mobile App - Online Shopping App
 
-Name: Lucile Pelou
+<div>
+  <img src="https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black">
+    <img src="https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=android-studio&logoColor=white">
+     <img src="https://img.shields.io/badge/Kotlin-0095D5?&style=for-the-badge&logo=kotlin&logoColor=white"/>
+    <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white">
+</div>
 
-Student ID: 74526
+## Installation
 
-Requirements Checklist:
+You can download the app in the release section.
+
+## Requirements Checklist:
 
 <ul>
   <li>- [x] Allow User to Signup</li>
